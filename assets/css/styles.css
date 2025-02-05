@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+body {
+    font-family: "JetBrains Mono", monospace;
+    @apply text-zinc-200;
+}
+
+h1 {
+    @apply text-3xl font-bold uppercase tracking-tight;
+}
+
+h2 {
+    @apply text-2xl font-bold text-lime-400;
+}
+
+h3 {
+    @apply text-xl font-bold text-lime-300;
+}
+
+p {
+    @apply text-sm mb-2;
+}
+
+ul {
+    @apply list-disc ml-4 marker:text-lime-400 text-sm;
+}
+
+a {
+    @apply underline decoration-zinc-200 hover:decoration-lime-400;
+}
