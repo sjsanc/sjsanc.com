@@ -1,7 +1,6 @@
 baseURL = 'https://sjsanc.com'
 languageCode = 'en-us'
 title = 'sjsanc'
-disableKinds = ['taxonomy', 'term', "page", "section", "sitemap"]
 
 [outputs]
     home = ["html"]
