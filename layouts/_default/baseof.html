@@ -5,6 +5,10 @@
     <title>
       {{ .Title }}
     </title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="manifest" href="/site.webmanifest">
+
     <meta name="description" content="{{ .Description }}" />
     {{ $t := debug.Timer "tailwindcss" }}
     {{ with resources.Get "css/styles.css" }}
@@ -35,5 +39,6 @@
   </head>
   <body class="p-4 bg-zinc-950">
     {{ block "main" . }}{{ end }}
+    <script src="{{ .Site.BaseURL }}/script.js"></script>
   </body>
 </html>
