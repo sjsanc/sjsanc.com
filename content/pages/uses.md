@@ -1,6 +1,7 @@
 +++
 title = "uses"
 description = "stuff I use"
+date = 2025-02-10
 +++
 
 ## Gear
@@ -16,7 +17,7 @@ Cheap Marshall Minor III in-ear headphones. I'm not much of an audiophile.
 
 ## Software
 
-I've used Arch for like, 5 years. I like being able to say "that's there because I put it there".
+- os: `arch`
 - wm: `sway`
 - term: `ghostty`
 - shell: `fish`
@@ -28,10 +29,8 @@ I've used Arch for like, 5 years. I like being able to say "that's there because
 - notes: `obsidian` w/ sync
 - books: `calibre`
 
-I write lots of Go, Typescript and C#.
-
 ## Services
 
-Protonmail for email. 
+Protonmail 
 
 

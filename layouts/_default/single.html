@@ -1,10 +1,15 @@
 {{ define "main" }}
-<main class="mx-auto max-w-[50ch] space-y-6">
-  <a href="{{ .Site.BaseURL }}">← Home</a>
-
+<main class="mx-auto max-w-[50ch] space-y-4">
+  <div>
+    <a href="{{ .Site.BaseURL }}">← Home</a>
+  </div>
+  
   <h1>{{ .Title }}</h1>
 
+  <div>
+    <small>Updated {{ .Date | time.Format ":date_short" }}</small>
+  </div>
+
   {{ .Content }}
-  
 </main>
 {{ end }}
