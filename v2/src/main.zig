@@ -3,11 +3,43 @@ const fs = std.fs;
 const log = std.log;
 const v2 = @import("v2");
 const cmark = @import("cmark.zig");
+const config = @import("config.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
+
+    const args = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, args);
+
+    var configPath: ?[]const u8 = null;
+    var i: usize = 1;
+
+    while (i < args.len) : (i += 1) {
+        if (std.mem.eql(u8, args[i], "-c") or std.mem.eql(u8, args[i], "--config")) {
+            i += 1;
+            if (i < args.len) {
+                configPath = args[i];
+            }
+        }
+    }
+
+    if (configPath == null) {
+        log.err("--conig path requird", .{});
+        return;
+    }
+
+    const config_content = try std.fs.cwd().readFileAlloc(allocator, configPath.?, 4096);
+    defer allocator.free(config_content);
+
+    const conf = try config.parseConfig(allocator, config_content);
+    defer allocator.free(conf.content_dir);
+    defer allocator.free(conf.output_dir);
+
+    std.debug.print("{s}\n", .{conf.output_dir});
+    // if (conf.output_dir) |output_dir| {
+    // }
 
     const contentDir = "/home/sjsanc/.vault/writing/articles";
     const buildDir = "/tmp/sjsanc.com/dist";
