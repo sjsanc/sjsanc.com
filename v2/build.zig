@@ -76,8 +76,8 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    exe.linkSystemLibrary("cmark");
-    exe.linkLibC();
+    exe.root_module.linkSystemLibrary("cmark", .{});
+    exe.root_module.link_libc = true;
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
