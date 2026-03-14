@@ -1,0 +1,6 @@
+.zig-out/
+.zig-cache/
+node_modules/
+.claude/
+PLAN.md
+TODO.md
