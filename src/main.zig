@@ -1,102 +1,26 @@
 const std = @import("std");
 const fs = std.fs;
 const log = std.log;
-const v2 = @import("v2");
-const cmark = @import("cmark.zig");
 const config = @import("config.zig");
+const parsers = @import("parsers.zig");
+const builders = @import("builders.zig");
 
-const Post = struct { raw: []const u8, path: []const u8, title: []const u8, date: []const u8, slug: []const u8, html: []const u8 };
+const Post = parsers.Post;
 
-fn copyStaticFile(gpa: std.mem.Allocator, output_dir: []const u8, name: []const u8) !void {
-    const src = try std.fs.path.join(gpa, &.{ "static/html", name });
-    defer gpa.free(src);
-    const dest = try std.fs.path.join(gpa, &.{ output_dir, name });
-    defer gpa.free(dest);
-    try fs.cwd().copyFile(src, fs.cwd(), dest, .{});
+fn postHref(p: Post) []const u8 {
+    return p.path;
 }
 
-fn renderTemplate(gpa: std.mem.Allocator, template: []const u8, content: []const u8) ![]const u8 {
-    const marker = "{{ content }}";
-    const pos = std.mem.indexOf(u8, template, marker) orelse return error.TemplateMissingContentMarker;
-    return std.mem.concat(gpa, u8, &.{
-        template[0..pos],
-        content,
-        template[pos + marker.len ..],
-    });
+fn postLabel(p: Post) []const u8 {
+    return p.title;
 }
 
-fn writeFile(path: []const u8, content: []const u8) !void {
-    const f = try fs.createFileAbsolute(path, .{});
-    defer f.close();
-    try f.writeAll(content);
+fn postDate(p: Post) []const u8 {
+    return p.date;
 }
 
-fn buildPostList(gpa: std.mem.Allocator, posts: std.ArrayListUnmanaged(Post)) !std.ArrayListUnmanaged(u8) {
-    var list_buf: std.ArrayListUnmanaged(u8) = .{};
-    for (posts.items) |post| {
-        try list_buf.appendSlice(gpa, "<li><a href=\"posts/");
-        try list_buf.appendSlice(gpa, post.path);
-        try list_buf.appendSlice(gpa, "\">");
-        try list_buf.appendSlice(gpa, post.title);
-        try list_buf.appendSlice(gpa, " ");
-        try list_buf.appendSlice(gpa, post.date[0..4]); // year
-        try list_buf.appendSlice(gpa, "</a></li>\n");
-    }
-    return list_buf;
-}
-
-fn buildWritingPage(gpa: std.mem.Allocator, posts: std.ArrayListUnmanaged(Post), output_dir: []const u8) !void {
-    var list_buf = try buildPostList(gpa, posts);
-    defer list_buf.deinit(gpa);
-
-    const template = try fs.cwd().readFileAlloc(gpa, "static/html/writing.html", 64 * 1024);
-    defer gpa.free(template);
-
-    const page = try renderTemplate(gpa, template, list_buf.items);
-    defer gpa.free(page);
-
-    const dest = try std.fs.path.join(gpa, &.{ output_dir, "writing.html" });
-    defer gpa.free(dest);
-
-    const file = try fs.createFileAbsolute(dest, .{});
-    defer file.close();
-
-    try file.writeAll(page);
-}
-
-fn buildPostPages(gpa: std.mem.Allocator, posts: std.ArrayListUnmanaged(Post), output_dir: []const u8) !void {
-    const posts_path = try std.fs.path.join(gpa, &.{ output_dir, "posts" });
-    defer gpa.free(posts_path);
-    try fs.makeDirAbsolute(posts_path);
-
-    const template = try fs.cwd().readFileAlloc(gpa, "templates/post.html", 64 * 1024);
-    defer gpa.free(template);
-
-    const marker = "{{ content }}";
-    const marker_pos = std.mem.indexOf(u8, template, marker) orelse return error.TemplateMissingContentMarker;
-    const before = template[0..marker_pos];
-    const after = template[marker_pos + marker.len ..];
-
-    for (posts.items) |post| {
-        const page = try std.mem.concat(gpa, u8, &.{ before, post.html, after });
-        defer gpa.free(page);
-
-        // swap .md for .html and join with posts output path
-        const html_name = try std.mem.replaceOwned(u8, gpa, post.path, ".md", ".html");
-        defer gpa.free(html_name);
-        const out_path = try std.fs.path.join(gpa, &.{ posts_path, html_name });
-        defer gpa.free(out_path);
-
-        // ensure parent dir exists for nested paths like 2024/test.html
-        if (std.fs.path.dirname(out_path)) |dir| {
-            try std.fs.cwd().makePath(dir);
-        }
-
-        const file = try fs.createFileAbsolute(out_path, .{});
-        defer file.close();
-        try file.writeAll(page);
-        log.info("wrote: {s}", .{out_path});
-    }
+fn postDateDesc(_: void, a: Post, b: Post) bool {
+    return std.mem.order(u8, a.date, b.date) == .gt;
 }
 
 pub fn main() !void {
@@ -104,11 +28,9 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    // retrieve the process args
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
 
-    // extract the config file path
     var configPath: ?[]const u8 = null;
     var i: usize = 1;
     while (i < args.len) : (i += 1) {
@@ -121,36 +43,57 @@ pub fn main() !void {
     }
 
     if (configPath == null) {
-        log.err("--config path requird", .{});
+        log.err("--config path required", .{});
         return;
     }
 
-    // read the contents of the config file
-    const config_content = try std.fs.cwd().readFileAlloc(allocator, configPath.?, 4096);
+    const config_content = try fs.cwd().readFileAlloc(allocator, configPath.?, 4096);
     defer allocator.free(config_content);
 
-    // parse the config file
     const conf = try config.parseConfig(allocator, config_content);
     defer allocator.free(conf.content_dir);
     defer allocator.free(conf.output_dir);
 
-    // clear the dist/ folder
+    // clear and recreate output dir
     fs.deleteTreeAbsolute(conf.output_dir) catch |err| {
         if (err != error.FileNotFound) return err;
     };
     try fs.cwd().makePath(conf.output_dir);
 
-    try copyStaticFile(allocator, conf.output_dir, "index.html");
+    // copy static assets (images, etc.) into output dir
+    const static_images_src = "static/images";
+    const static_images_dst = try std.fs.path.join(allocator, &.{ conf.output_dir, "images" });
+    defer allocator.free(static_images_dst);
+    try fs.cwd().makePath(static_images_dst);
 
-    try copyStaticFile(allocator, conf.output_dir, "uses.html");
+    var img_dir = fs.cwd().openDir(static_images_src, .{ .iterate = true }) catch |err| blk: {
+        if (err == error.FileNotFound) break :blk null;
+        return err;
+    } orelse null;
 
+    if (img_dir) |*d| {
+        defer d.close();
+        var iter = d.iterate();
+        while (try iter.next()) |entry| {
+            if (entry.kind != .file) continue;
+            const src_path = try std.fs.path.join(allocator, &.{ static_images_src, entry.name });
+            defer allocator.free(src_path);
+            const dst_path = try std.fs.path.join(allocator, &.{ static_images_dst, entry.name });
+            defer allocator.free(dst_path);
+            try fs.cwd().copyFile(src_path, fs.cwd(), dst_path, .{});
+        }
+    }
+    // Read the main layout template
+    const layout = try fs.cwd().readFileAlloc(allocator, "templates/layout.html", 64 * 1024);
+    defer allocator.free(layout);
+
+    // static pages: file -> layout -> disk
+    try builders.buildPage(allocator, layout, "static/html/index.html", conf.output_dir, "index.html", "index.html");
+    try builders.buildPage(allocator, layout, "static/html/about.html", conf.output_dir, "about.html", "about.html");
+
+    // parse markdown posts
     const content_dir = try fs.openDirAbsolute(conf.content_dir, .{ .iterate = true });
-    var posts = try parseContent(allocator, content_dir);
-
-    try buildWritingPage(allocator, posts, conf.output_dir);
-
-    try buildPostPages(allocator, posts, conf.output_dir);
-
+    var posts = try parsers.parseContent(allocator, content_dir);
     defer {
         for (posts.items) |post| {
             allocator.free(post.html);
@@ -159,55 +102,65 @@ pub fn main() !void {
         }
         posts.deinit(allocator);
     }
-}
 
-fn parseContent(gpa: std.mem.Allocator, dir: fs.Dir) !std.ArrayListUnmanaged(Post) {
-    var output: std.ArrayListUnmanaged(Post) = .{};
-    var walker = try dir.walk(gpa);
-    defer walker.deinit();
-    while (try walker.next()) |entry| {
-        if (entry.kind != .file) continue;
-        const file = try dir.openFile(entry.path, .{});
-        defer file.close();
-        const raw = try file.readToEndAlloc(gpa, 1024 * 1024);
-        const path = try gpa.dupe(u8, entry.path);
-        defer gpa.free(path);
-        const post = try parsePostMarkdown(gpa, raw, path);
-        try output.append(gpa, post);
-    }
-    return output;
-}
+    // Sort posts by date descending
+    std.mem.sort(Post, posts.items, {}, postDateDesc);
 
-fn parsePostMarkdown(gpa: std.mem.Allocator, raw: []const u8, path: []const u8) !Post {
-    const first_fence_idx = std.mem.indexOf(u8, raw, "---") orelse return error.NoFrontmatter;
-    const after_first = raw[first_fence_idx + 3 ..];
-    const second_fence_idx = std.mem.indexOf(u8, after_first, "---") orelse return error.NoFrontmatter;
-    const frontmatter = after_first[0..second_fence_idx];
+    // Build the list of posts HTML grouped by year
+    const post_list = try builders.buildPostListByYear(allocator, Post, posts.items, postHref, postLabel, postDate);
+    defer allocator.free(post_list);
 
-    var lines = std.mem.splitScalar(u8, frontmatter, '\n');
+    // load the writing template
+    const writing_template = try fs.cwd().readFileAlloc(allocator, "static/html/writing.html", 64 * 1024);
+    defer allocator.free(writing_template);
 
-    var title: []const u8 = "";
-    var date: []const u8 = "";
-    var slug: []const u8 = "";
+    // insert the list of posts into the template
+    const writing_content = try builders.replaceMarker(allocator, writing_template, "{{ content }}", post_list);
+    defer allocator.free(writing_content);
 
-    while (lines.next()) |line| {
-        const trimmed = std.mem.trim(u8, line, " \r");
-        if (trimmed.len == 0) continue;
-        const sep = std.mem.indexOf(u8, trimmed, ":") orelse continue;
-        const key = std.mem.trim(u8, trimmed[0..sep], " ");
-        const val = std.mem.trim(u8, trimmed[sep + 1 ..], " ");
+    // insert the writing page into the layout
+    const writing_with_content = try builders.replaceMarker(allocator, layout, "{{ content }}", writing_content);
+    defer allocator.free(writing_with_content);
 
-        if (std.mem.eql(u8, key, "title")) {
-            title = val;
-        } else if (std.mem.eql(u8, key, "date")) {
-            date = val;
-        } else if (std.mem.eql(u8, key, "slug")) {
-            slug = val;
+    const writing_page = try builders.replaceMarker(allocator, writing_with_content, "{{ path }}", "writing.html");
+    defer allocator.free(writing_page);
+
+    // write the page
+    const writing_dest = try std.fs.path.join(allocator, &.{ conf.output_dir, "writing.html" });
+    defer allocator.free(writing_dest);
+    try builders.writeFile(allocator, writing_dest, writing_page);
+
+    // post pages: each post's html -> post template -> layout -> disk
+    const post_template = try fs.cwd().readFileAlloc(allocator, "templates/post.html", 64 * 1024);
+    defer allocator.free(post_template);
+
+    // create the posts dir
+    const posts_dir = try std.fs.path.join(allocator, &.{ conf.output_dir, "posts" });
+    defer allocator.free(posts_dir);
+    try fs.cwd().makePath(posts_dir);
+
+    // for each post
+    for (posts.items) |post| {
+        const with_title = try builders.replaceMarker(allocator, post_template, "{{ title }}", post.title);
+        defer allocator.free(with_title);
+
+        const in_template = try builders.replaceMarker(allocator, with_title, "{{ content }}", post.html);
+        defer allocator.free(in_template);
+
+        const with_content = try builders.replaceMarker(allocator, layout, "{{ content }}", in_template);
+        defer allocator.free(with_content);
+
+        const page = try builders.replaceMarker(allocator, with_content, "{{ path }}", post.path);
+        defer allocator.free(page);
+
+        const out_path = try std.fs.path.join(allocator, &.{ conf.output_dir, post.path });
+        defer allocator.free(out_path);
+
+        if (std.fs.path.dirname(out_path)) |dir| {
+            try fs.cwd().makePath(dir);
         }
-    }
 
-    const path_html = try std.mem.replaceOwned(u8, gpa, path, ".md", ".html");
-    const content = after_first[second_fence_idx + 3 ..];
-    const html = try cmark.markdownToHtml(gpa, content);
-    return Post{ .raw = raw, .path = path_html, .title = title, .date = date, .slug = slug, .html = html };
+        try builders.writeFile(allocator, out_path, page);
+        log.info("wrote: {s}", .{out_path});
+    }
 }

@@ -1,1 +1,58 @@
 @import "tailwindcss";
+
+@layer base {
+  img {
+    @apply rounded-lg;
+  }
+
+  p {
+    @apply mb-4 text-zinc-200;
+  }
+
+  h1 {
+    @apply text-3xl mb-6 font-semibold;
+  }
+
+  h2 {
+    @apply text-xl mb-2 mt-6 font-semibold;
+  }
+
+  .list li {
+    @apply flex items-center gap-2;
+
+    a {
+      @apply flex items-center gap-2 w-full no-underline text-inherit transition-colors;
+
+      &:hover {
+        @apply text-zinc-400;
+      }
+
+      &::after {
+        content: "";
+        @apply flex-1 h-px;
+        order: 2;
+        background-image: radial-gradient(circle, theme(--color-zinc-600) 1px, transparent 1px);
+        background-size: 6px 2px;
+        background-position: center;
+      }
+    }
+
+    &:not(:has(a))::after {
+      content: "";
+      @apply flex-1 h-px;
+      order: 2;
+      background-image: radial-gradient(circle, theme(--color-zinc-600) 1px, transparent 1px);
+      background-size: 6px 2px;
+      background-position: center;
+    }
+
+    bold {
+      @apply font-bold whitespace-nowrap;
+    }
+
+    span {
+      @apply whitespace-nowrap text-zinc-400;
+      order: 3;
+    }
+  }
+}

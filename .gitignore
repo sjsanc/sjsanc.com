@@ -4,3 +4,4 @@ node_modules/
 .claude/
 PLAN.md
 TODO.md
+dist/
