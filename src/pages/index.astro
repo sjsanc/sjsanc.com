@@ -1,0 +1,87 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+import Github from 'lucide-astro/Github';
+import Linkedin from 'lucide-astro/Linkedin';
+import FileText from 'lucide-astro/FileText';
+import Rss from 'lucide-astro/Rss';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <body class="bg-slate-50 text-black antialiased">
+
+    <div class="fixed top-4 right-4">
+      <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg hover:bg-black/5 transition-colors flex items-center text-neutral-400 hover:text-black">
+        <Rss size={18} />
+      </a>
+    </div>
+
+    <main class="max-w-3xl mx-auto px-6 py-20">
+
+      <div class="flex flex-col items-center text-center mb-6">
+        <a href="https://hon.fandom.com/wiki/Portal_Key" target="_blank" rel="noopener noreferrer">
+          <img
+            src="/images/portal_key.png"
+            alt="Portal Key"
+            class="w-48 mb-4 animate-float" style="box-shadow: 0 20px 40px rgba(0,0,0,0.4);"
+          />
+        </a>
+        <h1 class="font-medium tracking-tight mb-4" style="font-family: 'Outfit', sans-serif; font-size: 64px;">sjsanc</h1>
+        <div class="flex gap-1 mb-4">
+          <a href="https://github.com/sjsanc" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base hover:bg-black/5 transition-colors">
+            <Github size={16} />GitHub
+          </a>
+          <a href="https://www.linkedin.com/in/steven-scheepers-72b45b131/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base hover:bg-black/5 transition-colors">
+            <Linkedin size={16} />LinkedIn
+          </a>
+          <a href="#" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base hover:bg-black/5 transition-colors">
+            <FileText size={16} />Resume
+          </a>
+        </div>
+        <p class="text-base text-neutral-500 max-w-sm">I'm a software engineer from Somewhere, Global North. I have an interest in writing. Maybe you'll have an interest in my interest.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-8 mt-12">
+
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-3 text-center">Projects</h2>
+          <ul class="flex flex-col">
+            <li>
+              <a href="https://drill-your-queries.pages.dev/?s=en3iau" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-black/5 transition-colors">
+                <span class="font-medium text-base">Drill Your Queries</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-3 text-center">Posts</h2>
+          <ul class="flex flex-col">
+            {posts.map(post => (
+              <li>
+                <a href={`/blog/${post.id}/`} class="flex items-baseline justify-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 transition-colors">
+                  <span class="font-medium text-base">{post.data.title}</span>
+                  <time class="text-sm text-neutral-400" datetime={post.data.pubDate.toISOString()}>
+                    {post.data.pubDate.toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}
+                  </time>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+      </div>
+
+    </main>
+
+  </body>
+</html>
