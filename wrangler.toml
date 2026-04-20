@@ -1,0 +1,7 @@
+[pages]
+name = "sjsanc-com"
+build_command = "npm run build"
+output_directory = "dist"
+
+[pages.build_config]
+node_version = "22"
