@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -12,19 +13,62 @@ const posts = (await getCollection('blog')).sort(
 <html lang="en">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <style>
+      .neo-link {
+        background: white;
+        transform: translate(-4px, -4px);
+        transition: transform 0.1s ease;
+      }
+      .neo-link:hover {
+        transform: translate(-2px, -2px);
+      }
+      .neo-link:active {
+        transform: translate(0, 0);
+      }
+    </style>
   </head>
-  <body>
-    <main>
-      <ul>
-        {posts.map(post => (
-          <li>
-            <a href={`/blog/${post.id}/`}>{post.data.title}</a>
-            <time datetime={post.data.pubDate.toISOString()}>
-              {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-            </time>
-          </li>
-        ))}
-      </ul>
+  <body
+    class="bg-zinc-900 text-black antialiased p-2 min-h-screen"
+    style="background-color: #18181b; background-image: radial-gradient(circle at 50% 100%, transparent 20%, #27272a 21%, #27272a 34%, transparent 35%, transparent), radial-gradient(circle at 50% 0%, transparent 20%, #27272a 21%, #27272a 34%, transparent 35%, transparent); background-position: 0 0, -10px 0; background-size: 20px 15px;"
+  >
+    <main
+      class="max-w-[450px] bg-white flex flex-col mx-auto p-4 rounded-2xl my-4"
+      style="box-shadow: 6px 6px 0 0 #18181b;"
+    >
+      <div class="rounded-xl border-4 p-4 border-zinc-900 flex flex-col gap-5">
+        <div class="bg-zinc-900 rounded-lg self-start">
+          <a
+            href="/"
+            class="neo-link border-3 border-zinc-900 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm"
+          >
+            <ArrowLeft size={14} />Back
+          </a>
+        </div>
+        <h1
+          class="font-medium tracking-tight"
+          style="font-family: 'Outfit', sans-serif; font-size: 40px;"
+        >
+          Writing
+        </h1>
+        <ul class="flex flex-col gap-3">
+          {posts.map((post) => (
+            <li class="bg-zinc-900 rounded-lg">
+              <a
+                href={`/blog/${post.id}/`}
+                class="neo-link border-3 border-zinc-900 flex items-baseline justify-between gap-2 px-3 py-2 rounded-lg"
+              >
+                <span class="font-medium text-base">{post.data.title}</span>
+                <time
+                  class="text-sm text-neutral-400"
+                  datetime={post.data.pubDate.toISOString()}
+                >
+                  {post.data.pubDate.toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}
+                </time>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </main>
   </body>
 </html>

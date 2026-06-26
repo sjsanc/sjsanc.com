@@ -1,87 +1,218 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
-import { getCollection } from 'astro:content';
-import FileText from '@lucide/astro/icons/file-text';
-import Rss from '@lucide/astro/icons/rss';
+import BaseHead from "../components/BaseHead.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import { getCollection } from "astro:content";
+import FileText from "@lucide/astro/icons/file-text";
+import Rss from "@lucide/astro/icons/rss";
+import Gem from "@lucide/astro/icons/gem";
 
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+const posts = (await getCollection("blog")).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-  </head>
-  <body class="bg-slate-50 text-black antialiased">
-
-    <div class="fixed top-4 right-4">
-      <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg hover:bg-black/5 transition-colors flex items-center text-neutral-400 hover:text-black">
-        <Rss size={18} />
-      </a>
-    </div>
-
-    <main class="max-w-3xl mx-auto px-6 py-20">
-
-      <div class="flex flex-col items-center text-center mb-6">
-        <a href="https://hon.fandom.com/wiki/Portal_Key" target="_blank" rel="noopener noreferrer">
-          <img
-            src="/images/portal_key.png"
-            alt="Portal Key"
-            class="w-48 mb-4 animate-float" style="box-shadow: 0 20px 40px rgba(0,0,0,0.4);"
-          />
-        </a>
-        <h1 class="font-medium tracking-tight mb-4" style="font-family: 'Outfit', sans-serif; font-size: 64px;">sjsanc</h1>
-        <div class="flex gap-1 mb-4">
-          <a href="https://github.com/sjsanc" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base hover:bg-black/5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-            GitHub
-          </a>
-          <a href="https://www.linkedin.com/in/steven-scheepers-72b45b131/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base hover:bg-black/5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            LinkedIn
-          </a>
-          <a href="#" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base hover:bg-black/5 transition-colors">
-            <FileText size={16} />Resume
-          </a>
-        </div>
-        <p class="text-base text-neutral-500 max-w-sm">I'm a software engineer from Somewhere, Global North. I have an interest in writing. Maybe you'll have an interest in my interest.</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-8 mt-12">
-
-        <div>
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-3 text-center">Projects</h2>
-          <ul class="flex flex-col">
-            <li>
-              <a href="https://drill-your-queries.pages.dev/?s=en3iau" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-black/5 transition-colors">
-                <span class="font-medium text-base">Drill Your Queries</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-3 text-center">Posts</h2>
-          <ul class="flex flex-col">
-            {posts.map(post => (
-              <li>
-                <a href={`/blog/${post.id}/`} class="flex items-baseline justify-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 transition-colors">
-                  <span class="font-medium text-base">{post.data.title}</span>
-                  <time class="text-sm text-neutral-400" datetime={post.data.pubDate.toISOString()}>
-                    {post.data.pubDate.toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}
-                  </time>
+    <head>
+        <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+        <style>
+            .neo-link {
+                background: white;
+                transform: translate(-4px, -4px);
+                transition: transform 0.1s ease;
+            }
+            .neo-link:hover {
+                transform: translate(-2px, -2px);
+            }
+            .neo-link:active {
+                transform: translate(0, 0);
+            }
+        </style>
+    </head>
+    <body
+        class="bg-zinc-900 text-black antialiased p-2 sm:p-8 min-h-screen"
+        style="background-color: #18181b; background-image: radial-gradient(circle at 50% 100%, transparent 20%, #27272a 21%, #27272a 34%, transparent 35%, transparent), radial-gradient(circle at 50% 0%, transparent 20%, #27272a 21%, #27272a 34%, transparent 35%, transparent); background-position: 0 0, -10px 0; background-size: 20px 15px;"
+    >
+        <main
+            class="max-w-[450px] bg-white flex flex-col items-center mx-auto p-4 rounded-2xl"
+            style="box-shadow: 6px 6px 0 0 #18181b;"
+        >
+            <div
+                class="rounded-xl border-4 p-4 border-zinc-900 flex flex-col gap-5"
+            >
+                <a
+                    href="https://hon.fandom.com/wiki/Portal_Key"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <img
+                        src="/images/portal_key.png"
+                        alt="Portal Key"
+                        class="w-full rounded-lg"
+                    />
                 </a>
-              </li>
-            ))}
-          </ul>
-        </div>
 
-      </div>
+                <h1
+                    class="font-medium tracking-tight"
+                    style="font-family: 'Outfit', sans-serif; font-size: 64px;"
+                >
+                    @sjsanc
+                </h1>
 
-    </main>
+                <p class="text-base">
+                    I'm a software engineer from Somewhere, Global North.
+                </p>
 
-  </body>
+                <div>
+                    <h2
+                        class="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-3"
+                    >
+                        Links
+                    </h2>
+                    <ul class="flex flex-col gap-3">
+                        <li class="bg-zinc-900 rounded-lg">
+                            <a
+                                href="https://github.com/sjsanc"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="neo-link border-3 border-zinc-900 flex items-center gap-1.5 px-3 py-2 rounded-lg text-base"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    ><path
+                                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"
+                                    ></path></svg
+                                >
+                                GitHub
+                            </a>
+                        </li>
+                        <li class="bg-zinc-900 rounded-lg">
+                            <a
+                                href="https://www.linkedin.com/in/steven-scheepers-72b45b131/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="neo-link border-3 border-zinc-900 flex items-center gap-1.5 px-3 py-2 rounded-lg text-base"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    ><path
+                                        d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                                    ></path></svg
+                                >
+                                LinkedIn
+                            </a>
+                        </li>
+                        <li class="bg-zinc-900 rounded-lg">
+                            <a
+                                href="/resume.pdf"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="neo-link border-3 border-zinc-900 flex items-center gap-1.5 px-3 py-2 rounded-lg text-base"
+                            >
+                                <FileText size={16} />Resume
+                            </a>
+                        </li>
+                        <li class="bg-zinc-900 rounded-lg">
+                            <a
+                                href="/rss.xml"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="neo-link border-3 border-zinc-900 flex items-center gap-1.5 px-3 py-2 rounded-lg text-base"
+                            >
+                                <Rss size={16} />RSS
+                            </a>
+                        </li>
+                        <li class="bg-zinc-900 rounded-lg">
+                            <a
+                                href="gemini://sjsanc.com"
+                                class="neo-link border-3 border-zinc-900 flex items-center gap-1.5 px-3 py-2 rounded-lg text-base"
+                            >
+                                <Gem size={16} />Gemini
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="flex flex-col gap-5">
+                    <div>
+                        <h2
+                            class="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-3"
+                        >
+                            Projects
+                        </h2>
+                        <ul class="flex flex-col gap-3">
+                            <li class="bg-zinc-900 rounded-lg">
+                                <a
+                                    href="https://drill-your-queries.pages.dev/?s=en3iau"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="neo-link border-3 border-zinc-900 flex items-baseline gap-2 px-3 py-2 rounded-lg"
+                                >
+                                    <span class="font-medium text-base"
+                                        >Drill Your Queries</span
+                                    >
+                                </a>
+                            </li>
+                            <li class="bg-zinc-900 rounded-lg">
+                                <a
+                                    href="https://nineveh.sjsanc.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="neo-link border-3 border-zinc-900 flex items-baseline gap-2 px-3 py-2 rounded-lg"
+                                >
+                                    <span class="font-medium text-base"
+                                        >Nineveh</span
+                                    >
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h2
+                            class="text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-3"
+                        >
+                            Writing
+                        </h2>
+                        <ul class="flex flex-col gap-3">
+                            {
+                                posts.map((post) => (
+                                    <li class="bg-zinc-900 rounded-lg">
+                                        <a
+                                            href={`/blog/${post.id}/`}
+                                            class="neo-link border-3 border-zinc-900 flex items-baseline justify-between gap-2 px-3 py-2 rounded-lg"
+                                        >
+                                            <span class="font-medium text-base">
+                                                {post.data.title}
+                                            </span>
+                                            <time
+                                                class="text-sm text-neutral-400"
+                                                datetime={post.data.pubDate.toISOString()}
+                                            >
+                                                {post.data.pubDate.toLocaleDateString(
+                                                    "en-US",
+                                                    {
+                                                        month: "2-digit",
+                                                        year: "2-digit",
+                                                    },
+                                                )}
+                                            </time>
+                                        </a>
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </body>
 </html>
